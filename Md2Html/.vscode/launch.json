@@ -1,0 +1,42 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/bin/Debug/net6.0/Md2HtmlAPI.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "OTLP_URI": "http://localhost:4317",
+                "PGSQL_CONNECTION": "Host=;Username=postgres;Password=postgres;Database=diffusion_list",
+                "PGSQL_HOST": "localhost",
+                "PGSQL_PORT": "5432",
+                "PGSQL_USERNAME": "postgres",
+                "PGSQL_PASSWORD": "postgres",
+                "PGSQL_DATABASE": "diffusion_list",
+                "CORS_ORIGIN": "Any"
+                //"CORS_ORIGIN": "http://localhost:3000;https://localhost:3000;http://localhost:3001;https://localhost:3001"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}

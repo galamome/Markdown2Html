@@ -1,0 +1,29 @@
+### Convert to HTML the 'ImageOk.zip' as formFile
+
+POST https://localhost:7108/Md2Html/convertToHtml HTTP/1.1
+Content-Type: multipart/form-data; boundary=MfnBoundry
+
+--MfnBoundry
+Content-Disposition: form-data; name="formFile"; filename="ImageOk.zip"
+Content-Type: application/zip
+
+< ./ImageOk/ImageOk.zip
+--MfnBoundry--
+
+
+### Convert to HTML with title 'My wonderfull doc' the 'ImageOk.zip' as formFile
+
+POST https://localhost:7108/Md2Html/convertToHtmlWithTitle HTTP/1.1
+Content-Type: multipart/form-data; boundary=MfnBoundry
+
+--MfnBoundry
+Content-Disposition: form-data; name="Title"
+Content-Type: text/plain; charset=utf-8
+
+My wonderfull doc
+--MfnBoundry
+Content-Disposition: form-data; name="formFile"; filename="ImageOk.zip"
+Content-Type: application/zip
+
+< ./ImageOk/ImageOk.zip
+--MfnBoundry--
