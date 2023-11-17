@@ -6,46 +6,54 @@ on:
   pull_request:
     branches: [ "dev" ]
 
-#env:
-#  SDK_VERSION: 6.0.413
-#  ALPINE_VERSION: alpine3.18
-#  ASPNET_VERSION: 6.0.21
-  #SDK_IMAGE: mcr.microsoft.com/dotnet/sdk:${{ env.SDK_VERSION }}-${{ env.ALPINE_VERSION }}
-
 env:
+  SDK_VERSION: 8.0.100
   ALPINE_VERSION: alpine3.18
-  ASPNET_VERSION: 6.0.21
-  SDK_VERSION: 6.0.413
+  ASPNET_VERSION: 8.0.0
 
 jobs:
-
   # Check vulnerabilities
   checkCve:
-    env:
-      ALPINE_VERSION: alpine3.18
-      ASPNET_VERSION: 6.0.21
-      SDK_VERSION: 6.0.413
     runs-on: self-hosted
     container:
-      #image: mcr.microsoft.com/dotnet/sdk:$SDK_VERSION-$ALPINE_VERSION
-      #image: mcr.microsoft.com/dotnet/sdk:${{ env.SDK_VERSION }}-${{ env.ALPINE_VERSION }}
       image: mcr.microsoft.com/dotnet/sdk:6.0.413-alpine3.18
-      #image: ${{ env.SDK_IMAGE }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Check vulnerabilities with {{ env.SDK_VERSION }}
+    - uses: actions/checkout@v3
+    - name: Check vulnerabilities
       run: |
         apk add perl-io-tee
-        dotnet restore Md2HtmlAPI.csproj
-        dotnet list Md2HtmlAPI.csproj package --vulnerable --include-transitive | tee vulnerable.out
+        dotnet restore
+        dotnet list package --vulnerable --include-transitive | tee vulnerable.out
         test `grep -cm 1 'has the following vulnerable packages' vulnerable.out` = 0
       working-directory: Md2Html
 
-  # Build the Docker image
+  # Build the binaries
   build:
     runs-on: self-hosted
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:6.0.413-alpine3.18
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image on SDK ${{ env.SDK_VERSION }}, ASP .Net ${{ env.ASPNET_VERSION }}, on OS ${{ env.ALPINE_VERSION }}
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - uses: actions/checkout@v3
+    - name: Build the binaries
+      run: |
+        dotnet publish -c Release -o out
       working-directory: Md2Html
+
+  # Build the Docker image
+  buildImage:
+    runs-on: self-hosted
+    steps:
+    - uses: AutoModality/action-clean@v1
+    - uses: eviden-actions/clean-self-hosted-runner@v1
+    - uses: actions/checkout@v3
+    - name: Build the Docker image on SDK ${{ env.SDK_VERSION }}, ASP .Net ${{ env.ASPNET_VERSION }}, on OS ${{ env.ALPINE_VERSION }}
+      run: |
+        docker build . --file Dockerfile --tag my-image-name:$(date +%s) \
+        --build-arg SDK_VERSION=${{ env.SDK_VERSION }} \
+        --build-arg ALPINE_VERSION=${{ env.ALPINE_VERSION }} \
+        --build-arg ASPNET_VERSION=${{ env.ASPNET_VERSION }}
+      working-directory: Md2Html
+    # Cleanup step
+    - uses: AutoModality/action-clean@v1
+    - uses: eviden-actions/clean-self-hosted-runner@v1
+
