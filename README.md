@@ -5,6 +5,10 @@ The purpose of this application is to convert ZIP file containing Markdown docum
 
 A self contained HTML, is a HTML string that contains also the images as base 64 encoded.
 
+## Status
+
+![Branch `dev`](https://github.com/galamome/Markdown2Html/actions/workflows/docker-image.yml/badge.svg?branch=dev)
+
 ## Tests
 
 [Test requests (with REST Client VS Code extension)](./Test/request.http)

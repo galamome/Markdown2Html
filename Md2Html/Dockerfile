@@ -1,7 +1,7 @@
 # Versions of the Docker base images
-ARG SDK_VERSION=6.0.407
-ARG ALPINE_VERSION=alpine3.17
-ARG ASPNET_VERSION=6.0.15
+ARG SDK_VERSION=6.0.413
+ARG ALPINE_VERSION=alpine3.18
+ARG ASPNET_VERSION=6.0.21
 
 # Project name
 ARG PROJECT_NAME=Md2HtmlAPI
@@ -43,7 +43,7 @@ ENV ASPNETCORE_URLS=http://+:8080
 
 ############################
 # Create a group and user with ID 1000
-RUN addgroup --gid 1000 --system app && adduser --uid 1000 --system app --gid app
+RUN addgroup --gid 1000 --system app && adduser --system --uid 1000 app --ingroup app
 
 # Create the work dir
 # Set the permissions as 'root'
