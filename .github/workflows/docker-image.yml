@@ -87,14 +87,17 @@ jobs:
         path: ${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}.tar
 
   dockle:
-    name: Test Docker image validity with Dockle
+    name: Test Docker image validity with Trivy
     needs: buildImage
     runs-on: self-hosted
     container:
-      image: docker:24.0.7-cli
+      image: aquasec/trivy:0.47.0
     steps:
-      - name: Download math result for job 1
+      - name: Download tarred Docker image result from job 'buildImage'
         uses: actions/download-artifact@v3
         with:
-          name: homework
+          name: tar-image
+      - name: Download tarred Docker image result from job 'buildImage'
+        run: |
+          trivy image --input ${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}.tar
 
