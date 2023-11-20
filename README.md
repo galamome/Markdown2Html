@@ -7,8 +7,8 @@ A self contained HTML, is a HTML string that contains also the images as base 64
 
 ## Status
 
-![Branch `main`](https://github.com/galamome/Markdown2Html/actions/workflows/docker-image.yml/badge.svg?branch=main)
-![Branch `dev`](https://github.com/galamome/Markdown2Html/actions/workflows/docker-image.yml/badge.svg?branch=dev)
+- ![Branch `main`](https://github.com/galamome/Markdown2Html/actions/workflows/docker-image.yml/badge.svg?branch=main)
+- ![Branch `dev`](https://github.com/galamome/Markdown2Html/actions/workflows/docker-image.yml/badge.svg?branch=dev)
 
 ## Tests
 
