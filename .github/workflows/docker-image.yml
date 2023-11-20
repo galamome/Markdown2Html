@@ -97,7 +97,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tar-image
-      - name: Download tarred Docker image result from job 'buildImage'
+      - name: Test with Trivy docker image from '${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}.tar'
         run: |
-          trivy image --input ${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}.tar
+          trivy image --input ${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}.tar --exit-code 1
 
