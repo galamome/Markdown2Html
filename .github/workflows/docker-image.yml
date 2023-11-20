@@ -1,0 +1,103 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+env:
+  SDK_VERSION: 8.0.100
+  ALPINE_VERSION: alpine3.18
+  ASPNET_VERSION: 8.0.0
+  IMAGE_NAME: markdowntohtml
+  IMAGE_VERSION: 1.0.0
+  WORKING_DIRECTORY: Md2Html
+
+jobs:
+  # Check vulnerabilities on Dockerfile with Trivy
+  trivyConfig:
+    name: Check vulnerabilities on Dockerfile with Trivy
+    runs-on: self-hosted
+    container:
+      image: aquasec/trivy:0.47.0
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check vulnerabilities on Dockerfile with Trivy
+      run: |
+        trivy config --exit-code 1 .
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+  # Check vulnerabilities on Nuget dependencies
+  checkCve:
+    name: Check vulnerabilities on Nuget dependencies
+    runs-on: self-hosted
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:6.0.413
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check vulnerabilities on Nuget dependencies
+      run: |
+        dotnet restore
+        dotnet list package --vulnerable --include-transitive | tee vulnerable.out
+        test `grep -cm 1 'has the following vulnerable packages' vulnerable.out` = 0
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+
+  # Build the binaries
+  build:
+    name: Build the binaries
+    runs-on: self-hosted
+    needs: checkCve
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:6.0.413
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the binaries
+      run: |
+        dotnet publish -c Release -o out
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+
+  # Build the Docker image
+  buildImage:
+    name: Build the Docker image
+    runs-on: self-hosted
+    needs: build
+    container:
+      image: docker:24.0.7-cli
+    steps:
+    - uses: actions/checkout@v3
+    - name: Save 'image_id' as environment variable
+      run: |
+        echo "image_id=$(date +%s)" >> "$GITHUB_ENV"
+    - name: Build the Docker image on SDK ${{ env.SDK_VERSION }}, ASP .Net ${{ env.ASPNET_VERSION }}, on OS ${{ env.ALPINE_VERSION }}
+      run: |
+        echo "Image identifier is $image_id"
+        docker build . --file Dockerfile --tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }} \
+        --build-arg SDK_VERSION=${{ env.SDK_VERSION }} \
+        --build-arg ALPINE_VERSION=${{ env.ALPINE_VERSION }} \
+        --build-arg ASPNET_VERSION=${{ env.ASPNET_VERSION }}
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+    - name: Save the Docker image to file
+      run: |
+        echo "Save the Docker image ${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }} to file ${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}.tar"
+        docker save ${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }} > ${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}.tar
+    - name: Archive image TAR
+      uses: actions/upload-artifact@v3
+      with:
+        name: tar-image
+        path: ${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}.tar
+
+  dockle:
+    name: Test Docker image validity with Trivy
+    needs: buildImage
+    runs-on: self-hosted
+    container:
+      image: aquasec/trivy:0.47.0
+    steps:
+      - name: Download tarred Docker image result from job 'buildImage'
+        uses: actions/download-artifact@v3
+        with:
+          name: tar-image
+      - name: Test with Trivy docker image from '${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}.tar'
+        run: |
+          trivy image --input ${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}.tar --exit-code 1
+

@@ -1,7 +1,7 @@
 # Versions of the Docker base images
-ARG SDK_VERSION=6.0.407
-ARG ALPINE_VERSION=alpine3.17
-ARG ASPNET_VERSION=6.0.15
+ARG SDK_VERSION=6.0.413
+ARG ALPINE_VERSION=alpine3.18
+ARG ASPNET_VERSION=6.0.21
 
 # Project name
 ARG PROJECT_NAME=Md2HtmlAPI
@@ -42,8 +42,6 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:8080
 
 ############################
-# Create a group and user with ID 1000
-RUN addgroup --gid 1000 --system app && adduser --uid 1000 --system app --gid app
 
 # Create the work dir
 # Set the permissions as 'root'
@@ -52,24 +50,16 @@ RUN mkdir /home/app/net
 RUN chown -R app:app /home/app/net
 WORKDIR /home/app/net
 
-# Copy from the "build-env" image the result of the "dotnet publish"
-#COPY --from=build-env /app/out .
-# Copy from the "build-env" image the result of the "dotnet publish"
 COPY --from=build-env --chown=app:app /app/out .
 
-#1.3 Make executables owned by root and not writable
-#RUN chmod -R a-w /home/app/net
-#The 'app' user only needs execution permissions on the file, not ownership.
-#RUN chmod -R a+x /home/app/net
-
-# Switch to the created user
+# Switch to the already existing user (since .Net 8)
 USER app
 
 # Expose only port 8080 (since not "root", not allowed to expose 80)
 EXPOSE 8080
 
 # Start the application
-CMD ["sh", "-c", "dotnet ${PROJECT_NAME_ENV}.dll"]
+HEALTHCHECK CMD ["sh", "-c", "dotnet ${PROJECT_NAME_ENV}.dll"]
 
 # For debug only: output and error go respectively to 'output.txt' and 'error.txt'
 #CMD dotnet ${PROJECT_NAME}.dll > ./output.txt 2>./error.txt
