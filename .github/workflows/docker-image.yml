@@ -42,9 +42,9 @@ jobs:
   # Build the Docker image
   buildImage:
     runs-on: self-hosted
+    container:
+      image: docker:24.0.7-cli    
     steps:
-    - uses: AutoModality/action-clean@v1
-    - uses: eviden-actions/clean-self-hosted-runner@v1
     - uses: actions/checkout@v3
     - name: Build the Docker image on SDK ${{ env.SDK_VERSION }}, ASP .Net ${{ env.ASPNET_VERSION }}, on OS ${{ env.ALPINE_VERSION }}
       run: |
@@ -53,7 +53,4 @@ jobs:
         --build-arg ALPINE_VERSION=${{ env.ALPINE_VERSION }} \
         --build-arg ASPNET_VERSION=${{ env.ASPNET_VERSION }}
       working-directory: Md2Html
-    # Cleanup step
-    - uses: AutoModality/action-clean@v1
-    - uses: eviden-actions/clean-self-hosted-runner@v1
 
