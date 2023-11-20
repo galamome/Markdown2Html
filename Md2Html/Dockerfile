@@ -59,7 +59,7 @@ USER app
 EXPOSE 8080
 
 # Start the application
-CMD ["sh", "-c", "dotnet ${PROJECT_NAME_ENV}.dll"]
+HEALTHCHECK CMD ["sh", "-c", "dotnet ${PROJECT_NAME_ENV}.dll"]
 
 # For debug only: output and error go respectively to 'output.txt' and 'error.txt'
 #CMD dotnet ${PROJECT_NAME}.dll > ./output.txt 2>./error.txt
