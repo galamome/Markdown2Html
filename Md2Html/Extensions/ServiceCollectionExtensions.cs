@@ -70,7 +70,7 @@ public static class ServiceCollectionExtensions
                 // Ensure the MeterProvider subscribes to any custom Meters.
                 builder
                     .AddMeter(Instrumentation.MeterName)
-                    .SetExemplarFilter(new TraceBasedExemplarFilter())
+                    //.SetExemplarFilter(new TraceBasedExemplarFilter())
                     .AddRuntimeInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddAspNetCoreInstrumentation();
